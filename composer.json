@@ -1,0 +1,29 @@
+{
+  "name": "enadstack/laravel-importer-exporter",
+  "description": "Simple import/export for Laravel (CSV first).",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Enadstack\\ImporterExporter\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Enadstack\\ImporterExporter\\ImporterExporterServiceProvider"
+      ]
+    }
+  },
+  "version": "0.1.0",
+  "require": {
+    "php": "^8.2",
+    "illuminate/support": "^12.0",
+    "illuminate/filesystem": "^12.0"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^10.0"
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
