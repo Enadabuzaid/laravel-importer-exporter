@@ -9,8 +9,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class IeFile extends Model
 {
     protected $table = 'ie_files';
-    protected $keyType = 'string';
-    public $incrementing = false;
 
     protected $fillable = [
         'type','direction','status','disk','path','original_name','size',

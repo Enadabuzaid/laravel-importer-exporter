@@ -163,6 +163,7 @@ class ImportExportController extends Controller
 
             if ($errors) {
                 $file->rows()->create([
+                    'file_id'     => $file->id,
                     'row_index'    => $rowIndex++,
                     'payload'      => $assoc,
                     'status'       => 'failed',
@@ -180,6 +181,7 @@ class ImportExportController extends Controller
                 }
 
                 $file->rows()->create([
+                    'file_id'      => $file->id,
                     'row_index'    => $rowIndex++,
                     'payload'      => $assoc,
                     'status'       => 'processed',
@@ -188,6 +190,7 @@ class ImportExportController extends Controller
                 $ok++;
             } catch (\Throwable $e) {
                 $file->rows()->create([
+                    'file_id'      => $file->id,
                     'row_index'    => $rowIndex++,
                     'payload'      => $assoc,
                     'status'       => 'failed',
