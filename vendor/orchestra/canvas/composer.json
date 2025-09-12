@@ -1,4 +1,5 @@
 {
+    "$schema": "https://getcomposer.org/schema.json",
     "name": "orchestra/canvas",
     "description": "Code Generators for Laravel Applications and Packages",
     "type": "library",
@@ -31,23 +32,23 @@
         "php": "^8.2",
         "composer-runtime-api": "^2.2",
         "composer/semver": "^3.0",
-        "illuminate/console": "^11.43.0",
-        "illuminate/database": "^11.43.0",
-        "illuminate/filesystem": "^11.43.0",
-        "illuminate/support": "^11.43.0",
-        "orchestra/canvas-core": "^9.1.1",
-        "orchestra/sidekick": "^1.0.2",
-        "orchestra/testbench-core": "^9.11.0",
+        "illuminate/console": "^12.3.0",
+        "illuminate/database": "^12.3.0",
+        "illuminate/filesystem": "^12.3.0",
+        "illuminate/support": "^12.3.0",
+        "orchestra/canvas-core": "^10.0.1",
+        "orchestra/sidekick": "^1.1.0",
+        "orchestra/testbench-core": "^10.1.0",
         "symfony/polyfill-php83": "^1.31",
-        "symfony/yaml": "^7.0.3"
+        "symfony/yaml": "^7.2.0"
     },
     "require-dev": {
-        "laravel/framework": "^11.43.0",
+        "laravel/framework": "^12.3.0",
         "laravel/pint": "^1.21",
-        "mockery/mockery": "^1.6.10",
-        "phpstan/phpstan": "^2.1",
-        "phpunit/phpunit": "^11.5.7",
-        "spatie/laravel-ray": "^1.39.1"
+        "mockery/mockery": "^1.6.12",
+        "phpstan/phpstan": "^2.1.8",
+        "phpunit/phpunit": "^11.5.13",
+        "spatie/laravel-ray": "^1.40.1"
     },
     "config": {
         "preferred-install": {

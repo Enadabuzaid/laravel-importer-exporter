@@ -117,24 +117,6 @@ function remote(Closure|array|string $command, array|string $env = [], ?bool $tt
 }
 
 /**
- * Run callback only once.
- *
- * @api
- *
- * @param  mixed  $callback
- * @return \Closure():mixed
- *
- * @deprecated 7.55.0 Use `Orchestra\Sidekick\once()` instead.
- *
- * @codeCoverageIgnore
- */
-#[\Deprecated(message: 'Use `Orchestra\Sidekick\once()` instead', since: '7.55.0')]
-function once($callback): Closure
-{
-    return Sidekick\once($callback);
-}
-
-/**
  * Register after resolving callback.
  *
  * @api
@@ -254,25 +236,6 @@ function transform_realpath_to_relative(string $path, ?string $workingPath = nul
         ! empty($prefix) => implode($separator, [$prefix, ltrim($path, $separator)]),
         default => $path,
     };
-}
-
-/**
- * Transform relative path.
- *
- * @api
- *
- * @param  string  $path
- * @param  string  $workingPath
- * @return string
- *
- * @deprecated 7.55.0 Use `Orchestra\Sidekick\transform_relative_path()` instead.
- *
- * @codeCoverageIgnore
- */
-#[\Deprecated(message: 'Use `Orchestra\Sidekick\transform_relative_path()` instead', since: '7.55.0')]
-function transform_relative_path(string $path, string $workingPath): string
-{
-    return Sidekick\transform_relative_path($path, $workingPath);
 }
 
 /**
@@ -425,8 +388,8 @@ function laravel_vendor_exists(ApplicationContract $app, ?string $workingPath = 
     $appVendorPath = $app->basePath('vendor');
     $workingPath ??= package_path('vendor');
 
-    return $filesystem->isFile(join_paths($appVendorPath, 'autoload.php')) &&
-        $filesystem->hash(join_paths($appVendorPath, 'autoload.php')) === $filesystem->hash(join_paths($workingPath, 'autoload.php'));
+    return $filesystem->isFile(Sidekick\join_paths($appVendorPath, 'autoload.php')) &&
+        $filesystem->hash(Sidekick\join_paths($appVendorPath, 'autoload.php')) === $filesystem->hash(Sidekick\join_paths($workingPath, 'autoload.php'));
 }
 
 /**
@@ -444,6 +407,8 @@ function laravel_vendor_exists(ApplicationContract $app, ?string $workingPath = 
  * @return int|bool
  *
  * @phpstan-return (TOperator is null ? int : bool)
+ *
+ * @codeCoverageIgnore
  */
 function laravel_version_compare(string $version, ?string $operator = null): int|bool
 {
@@ -465,6 +430,8 @@ function laravel_version_compare(string $version, ?string $operator = null): int
  * @return int|bool
  *
  * @phpstan-return (TOperator is null ? int : bool)
+ *
+ * @codeCoverageIgnore
  *
  * @throws \RuntimeException
  */

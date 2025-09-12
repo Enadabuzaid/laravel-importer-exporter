@@ -3,6 +3,8 @@
   "description": "Simple import/export for Laravel (CSV first).",
   "type": "library",
   "license": "MIT",
+  "keywords": ["laravel", "import", "export", "csv", "excel"],
+  "homepage": "https://github.com/Enadabuzaid/laravel-importer-exporter",
   "autoload": {
     "psr-4": {
       "Enadstack\\ImporterExporter\\": "src/"
@@ -15,7 +17,6 @@
       ]
     }
   },
-  "version": "0.1.0",
   "require": {
     "php": "^8.2",
     "illuminate/support": "^12.0",

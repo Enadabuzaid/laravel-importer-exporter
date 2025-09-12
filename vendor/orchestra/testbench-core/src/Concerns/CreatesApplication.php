@@ -27,7 +27,6 @@ use Orchestra\Testbench\Features\TestingFeature;
 use Orchestra\Testbench\Foundation\PackageManifest;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
-use function Orchestra\Sidekick\join_paths;
 use function Orchestra\Testbench\after_resolving;
 use function Orchestra\Testbench\default_skeleton_path;
 use function Orchestra\Testbench\refresh_router_lookups;
@@ -249,40 +248,6 @@ trait CreatesApplication
     protected function getApplicationBasePath()
     {
         return static::applicationBasePath();
-    }
-
-    /**
-     * Resolve the application's base path (deprecated).
-     *
-     * @api
-     *
-     * @return string|null
-     *
-     * @deprecated 6.22.0 Use `applicationBasePath()` static method instead.
-     */
-    protected function getBasePath()
-    {
-        trigger_deprecation('orchestra/testbench-core', '6.22.0', 'Use `%s` static method instead.', 'applicationBasePath()');
-
-        return static::applicationBasePath();
-    }
-
-    /**
-     * Get the default application bootstrap file path (if exists).
-     *
-     * @internal
-     *
-     * @param  string  $filename
-     * @return string|false
-     *
-     * @deprecated
-     *
-     * @codeCoverageIgnore
-     */
-    #[\Deprecated('Removed unreliable method to determine default skeleton', since: '9.7.0')]
-    protected function getDefaultApplicationBootstrapFile(string $filename): string|false
-    {
-        return default_skeleton_path(join_paths('bootstrap', $filename));
     }
 
     /**
@@ -669,6 +634,8 @@ trait CreatesApplication
      *
      * @param  \Illuminate\Foundation\Application  $app
      * @return void
+     *
+     * @deprecated 10.0 Use "defineEnvironment()" instead.
      */
     protected function getEnvironmentSetUp($app)
     {

@@ -38,6 +38,7 @@ use Orchestra\Testbench\Contracts\Config as ConfigContract;
 use Orchestra\Testbench\Workbench\Workbench;
 
 use function Orchestra\Sidekick\join_paths;
+use function Orchestra\Sidekick\laravel_version_compare;
 
 /**
  * @api
@@ -225,19 +226,32 @@ class Application
         Component::forgetComponentsResolver();
         Component::forgetFactory();
         ConvertEmptyStringsToNull::flushState();
+
+        if (class_exists(EncodedHtmlString::class)) {
+            EncodedHtmlString::flushState();
+        }
+
         Factory::flushState();
-        EncodedHtmlString::flushState();
 
         if (! $instance instanceof Commander) {
-            HandleExceptions::flushState($instance);
+            if (laravel_version_compare('12.24.0', '<')) {
+                HandleExceptions::flushState();
+            } else {
+                HandleExceptions::flushState($instance);
+            }
         }
 
         JsonResource::wrap('data');
-        Markdown::flushState();
+
+        if (method_exists(Markdown::class, 'flushState')) {
+            Markdown::flushState();
+        }
+
         Migrator::withoutMigrations([]);
         Model::handleDiscardedAttributeViolationUsing(null);
         Model::handleLazyLoadingViolationUsing(null);
         Model::handleMissingAttributeViolationUsing(null);
+        Model::automaticallyEagerLoadRelationships(false);
         Model::preventAccessingMissingAttributes(false);
         Model::preventLazyLoading(false);
         Model::preventSilentlyDiscardingAttributes(false);
@@ -255,7 +269,11 @@ class Application
         TrimStrings::flushState();
         TrustProxies::flushState();
         TrustHosts::flushState();
-        Validator::flushState();
+
+        if (method_exists(Validator::class, 'flushState')) {
+            Validator::flushState();
+        }
+
         ValidateCsrfToken::flushState();
         WorkCommand::flushState();
     }
@@ -350,8 +368,6 @@ class Application
      * Resolve the application's base path.
      *
      * @api
-     *
-     * @internal
      *
      * @return string
      */
