@@ -283,14 +283,21 @@ class ImportExportController extends Controller
         ]);
     }
 
+    // src/Http/Controllers/ImportExportController.php
+
     public function download(string $id)
     {
         $file = IeFile::query()->whereKey($id)->firstOrFail();
 
-        abort_unless($file->direction === 'export' && $file->status === 'completed' && $file->path, 404);
+        abort_unless(
+            $file->direction === 'export' && $file->status === 'completed' && $file->path,
+            404
+        );
 
-        $disk   = config('importer-exporter.disk', config('filesystems.default', 'local'));
-        $name   = $file->original_name ?: basename($file->path);
+        // ✅ use the disk stored with the file, not the current config
+        $disk = $file->disk ?: config('importer-exporter.disk', config('filesystems.default', 'local'));
+
+        $name = $file->original_name ?: basename($file->path);
         $headers = [
             'Content-Type'        => 'text/csv; charset=UTF-8',
             'Content-Disposition' => "attachment; filename=\"{$name}\"",
@@ -298,14 +305,19 @@ class ImportExportController extends Controller
             'Pragma'              => 'no-cache',
         ];
 
+        // ✅ ensure it exists on that disk
+        if (!\Storage::disk($disk)->exists($file->path)) {
+            abort(404, 'Export file is missing on disk.');
+        }
+
         $diskConfig = config("filesystems.disks.$disk");
         $isLocal    = ($diskConfig['driver'] ?? null) === 'local';
 
         if ($isLocal) {
-            $absolute = Storage::disk($disk)->path($file->path);
+            $absolute = \Storage::disk($disk)->path($file->path);
             return response()->download($absolute, $name, $headers);
         }
 
-        return Storage::disk($disk)->download($file->path, $name, $headers);
+        return \Storage::disk($disk)->download($file->path, $name, $headers);
     }
 }
