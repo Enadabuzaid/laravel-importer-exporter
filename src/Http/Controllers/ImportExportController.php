@@ -74,15 +74,15 @@ class ImportExportController extends Controller
         // Create a file log entry first (direction=export)
         $disk = config('importer-exporter.disk', config('filesystems.default', 'local'));
         $file = IeFile::create([
-            'type'          => $type,
-            'direction'     => 'export',
-            'status'        => 'processing',
-            'disk'          => $disk,
-            'path'          => '',
+            'type' => $type,
+            'direction' => 'export',
+            'status' => 'processing',
+            'disk' => $disk,
+            'path' => '',
             'original_name' => $name,
-            'size'          => null,
-            'options'       => $request->all(),
-            'user_id'       => optional($request->user())->id,
+            'size' => null,
+            'options' => $request->all(),
+            'user_id' => optional($request->user())->id,
         ]);
 
         try {
@@ -95,18 +95,20 @@ class ImportExportController extends Controller
             // header row
             fputcsv($stream, $headers);
 
-            $total = 0; $ok = 0;
+            $total = 0;
+            $ok = 0;
             foreach ($exporter->source($request->all()) as $item) {
                 $row = $exporter->map($item);
                 // Normalize to scalars so fputcsv doesn't choke on enums/objects
                 $row = array_map(function ($v) {
                     if ($v instanceof \BackedEnum) return $v->value;
                     if (is_bool($v)) return $v ? 1 : 0;
-                    return is_scalar($v) || $v === null ? $v : (string) $v;
+                    return is_scalar($v) || $v === null ? $v : (string)$v;
                 }, $row);
 
                 fputcsv($stream, $row);
-                $total++; $ok++;
+                $total++;
+                $ok++;
             }
 
             // Save to disk and close temp stream
@@ -119,26 +121,27 @@ class ImportExportController extends Controller
 
             // Update file log
             $file->update([
-                'status'       => 'completed',
-                'path'         => $path,
-                'size'         => $size,
-                'total_rows'   => $total,
+                'status' => 'completed',
+                'path' => $path,
+                'size' => $size,
+                'total_rows' => $total,
                 'success_rows' => $ok,
-                'failed_rows'  => 0,
+                'failed_rows' => 0,
             ]);
 
             // Return a normal download response, delete after send
             return Storage::disk($disk)->download($path, $name, [
-                'Content-Type'        => 'text/csv; charset=UTF-8',
+                'Content-Type' => 'text/csv; charset=UTF-8',
                 'Content-Disposition' => "attachment; filename=\"{$name}\"",
-                'Cache-Control'       => 'no-store, no-cache, must-revalidate, max-age=0',
-                'Pragma'              => 'no-cache',
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+                'Pragma' => 'no-cache',
             ])->deleteFileAfterSend(true);
         } catch (\Throwable $e) {
             // Mark as failed and rethrow for visibility
             $file->update(['status' => 'failed']);
             throw $e;
         }
+    }
 
     public function files(Request $request)
     {
