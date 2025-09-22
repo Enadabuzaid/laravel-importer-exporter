@@ -129,13 +129,25 @@ class ImportExportController extends Controller
                 'failed_rows' => 0,
             ]);
 
-            // Return a normal download response, delete after send
-            return Storage::disk($disk)->download($path, $name, [
-                'Content-Type' => 'text/csv; charset=UTF-8',
+            // Prepare headers
+            $headersArr = [
+                'Content-Type'        => 'text/csv; charset=UTF-8',
                 'Content-Disposition' => "attachment; filename=\"{$name}\"",
-                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
-                'Pragma' => 'no-cache',
-            ])->deleteFileAfterSend(true);
+                'Cache-Control'       => 'no-store, no-cache, must-revalidate, max-age=0',
+                'Pragma'              => 'no-cache',
+            ];
+
+            // If the disk is local, serve via BinaryFileResponse so we can delete after send.
+            $diskConfig = config("filesystems.disks.$disk");
+            $isLocal = ($diskConfig['driver'] ?? null) === 'local';
+            if ($isLocal) {
+                $absolute = Storage::disk($disk)->path($path);
+                return response()->download($absolute, $name, $headersArr)->deleteFileAfterSend(true);
+            }
+
+            // Non-local disks (e.g., s3) return a StreamedResponse; deleteFileAfterSend() is not available.
+            // Consider a scheduled cleanup for old exports on non-local disks.
+            return Storage::disk($disk)->download($path, $name, $headersArr);
         } catch (\Throwable $e) {
             // Mark as failed and rethrow for visibility
             $file->update(['status' => 'failed']);
