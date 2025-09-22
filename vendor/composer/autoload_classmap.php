@@ -1329,6 +1329,7 @@ return array(
     'SebastianBergmann\\CodeCoverage\\Util\\DirectoryCouldNotBeCreatedException' => $vendorDir . '/phpunit/php-code-coverage/src/Exception/DirectoryCouldNotBeCreatedException.php',
     'SebastianBergmann\\CodeCoverage\\Util\\Filesystem' => $vendorDir . '/phpunit/php-code-coverage/src/Util/Filesystem.php',
     'SebastianBergmann\\CodeCoverage\\Util\\Percentage' => $vendorDir . '/phpunit/php-code-coverage/src/Util/Percentage.php',
+    'SebastianBergmann\\CodeCoverage\\Util\\Xml' => $vendorDir . '/phpunit/php-code-coverage/src/Util/Xml.php',
     'SebastianBergmann\\CodeCoverage\\Version' => $vendorDir . '/phpunit/php-code-coverage/src/Version.php',
     'SebastianBergmann\\CodeCoverage\\WriteOperationFailedException' => $vendorDir . '/phpunit/php-code-coverage/src/Exception/WriteOperationFailedException.php',
     'SebastianBergmann\\CodeCoverage\\XmlException' => $vendorDir . '/phpunit/php-code-coverage/src/Exception/XmlException.php',

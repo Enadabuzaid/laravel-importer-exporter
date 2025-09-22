@@ -71,17 +71,74 @@ class ImportExportController extends Controller
         $headers = $exporter->headers();
         $name = "{$type}_export_" . now()->format('Ymd_His') . ".csv";
 
-        return response()->streamDownload(function () use ($exporter, $headers, $request) {
-            $out = fopen('php://output', 'w');
-            fputcsv($out, $headers);
+        // Create a file log entry first (direction=export)
+        $disk = config('importer-exporter.disk', config('filesystems.default', 'local'));
+        $file = IeFile::create([
+            'type'          => $type,
+            'direction'     => 'export',
+            'status'        => 'processing',
+            'disk'          => $disk,
+            'path'          => '',
+            'original_name' => $name,
+            'size'          => null,
+            'options'       => $request->all(),
+            'user_id'       => optional($request->user())->id,
+        ]);
 
+        try {
+            // Build CSV in a temp stream, then store to disk (more reliable than streaming)
+            $stream = fopen('php://temp', 'r+');
+
+            // UTF-8 BOM for Excel/Arabic
+            fwrite($stream, "\xEF\xBB\xBF");
+
+            // header row
+            fputcsv($stream, $headers);
+
+            $total = 0; $ok = 0;
             foreach ($exporter->source($request->all()) as $item) {
                 $row = $exporter->map($item);
-                fputcsv($out, $row);
+                // Normalize to scalars so fputcsv doesn't choke on enums/objects
+                $row = array_map(function ($v) {
+                    if ($v instanceof \BackedEnum) return $v->value;
+                    if (is_bool($v)) return $v ? 1 : 0;
+                    return is_scalar($v) || $v === null ? $v : (string) $v;
+                }, $row);
+
+                fputcsv($stream, $row);
+                $total++; $ok++;
             }
-            fclose($out);
-        }, $name, ['Content-Type' => 'text/csv']);
-    }
+
+            // Save to disk and close temp stream
+            rewind($stream);
+            $path = 'ie/exports/' . $name;
+            Storage::disk($disk)->put($path, stream_get_contents($stream));
+            fclose($stream);
+
+            $size = Storage::disk($disk)->size($path);
+
+            // Update file log
+            $file->update([
+                'status'       => 'completed',
+                'path'         => $path,
+                'size'         => $size,
+                'total_rows'   => $total,
+                'success_rows' => $ok,
+                'failed_rows'  => 0,
+            ]);
+
+            // Return a normal download response, delete after send
+            return Storage::disk($disk)->download($path, $name, [
+                'Content-Type'        => 'text/csv; charset=UTF-8',
+                'Content-Disposition' => "attachment; filename=\"{$name}\"",
+                'Cache-Control'       => 'no-store, no-cache, must-revalidate, max-age=0',
+                'Pragma'              => 'no-cache',
+            ])->deleteFileAfterSend(true);
+        } catch (\Throwable $e) {
+            // Mark as failed and rethrow for visibility
+            $file->update(['status' => 'failed']);
+            throw $e;
+        }
 
     public function files(Request $request)
     {
