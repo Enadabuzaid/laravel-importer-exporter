@@ -282,4 +282,30 @@ class ImportExportController extends Controller
             'failed_rows'  => $fail,
         ]);
     }
+
+    public function download(string $id)
+    {
+        $file = IeFile::query()->whereKey($id)->firstOrFail();
+
+        abort_unless($file->direction === 'export' && $file->status === 'completed' && $file->path, 404);
+
+        $disk   = config('importer-exporter.disk', config('filesystems.default', 'local'));
+        $name   = $file->original_name ?: basename($file->path);
+        $headers = [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$name}\"",
+            'Cache-Control'       => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma'              => 'no-cache',
+        ];
+
+        $diskConfig = config("filesystems.disks.$disk");
+        $isLocal    = ($diskConfig['driver'] ?? null) === 'local';
+
+        if ($isLocal) {
+            $absolute = Storage::disk($disk)->path($file->path);
+            return response()->download($absolute, $name, $headers);
+        }
+
+        return Storage::disk($disk)->download($file->path, $name, $headers);
+    }
 }
